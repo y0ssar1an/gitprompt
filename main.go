@@ -23,6 +23,7 @@ func main() {
 		return
 	}
 
+	// %% is how you escape a percent sign. It translates to a single '%' char.
 	colorized := fmt.Sprintf(" %%F{blue}(%%F{red}%s%%F{blue})%%f", branch)
 	dirty := isDirty()
 	if err != nil {
@@ -37,6 +38,9 @@ func main() {
 	fmt.Println(colorized)
 }
 
+// gitBranch returns the name of the current branch. This is recorded in the
+// .git/HEAD file. If we're not in a git repo or there's an error, it will
+// return an empty string.
 func gitBranch(path string) string {
 	if strings.Contains(path, string(os.PathSeparator)+".git") {
 		return ".git"
