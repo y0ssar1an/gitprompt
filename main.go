@@ -52,10 +52,12 @@ func gitBranch(path string) string {
 		return ""
 	}
 
-	i := bytes.Index(b, []byte("refs/heads/")) + len("refs/heads/")
+	const prefix = []byte("refs/heads/")
+	i := bytes.Index(b, prefix)
 	if i == -1 {
 		return ""
 	}
+	i += len(prefix)
 
 	return strings.TrimSpace(string(b[i:]))
 }
