@@ -59,7 +59,7 @@ func gitBranch(path string) string {
 	}
 	i += len(prefix)
 
-	return strings.TrimSpace(string(b[i:]))
+	return string(bytes.TrimSpace(b[i:]))
 }
 
 // findGitDir walks from the current directory to the root directory, returning
@@ -79,11 +79,13 @@ func findGitDir(path string) string {
 	return ""
 }
 
+// isDirty returns true if the repo has changed since the last commit.
 func isDirty() bool {
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
+
+	var buf strings.Builder
 	cmd := exec.CommandContext(ctx, "git", "ls-files", "--deleted", "--modified", "--unmerged", "--killed", "--other", "--exclude-standard")
-	var buf bytes.Buffer
 	cmd.Stdout = &buf
 
 	if err := cmd.Run(); err != nil {
