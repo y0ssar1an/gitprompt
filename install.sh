@@ -1,3 +1,3 @@
 #!/usr/bin/env zsh
 
-go install -ldflags '-s -w'
+CGO_ENABLED=0 go install -ldflags '-s -w'
