@@ -1,0 +1,9 @@
+[package]
+name = "gitprompt"
+version = "0.1.0"
+authors = ["Ryan Boehning <ryanboehning@gmail.com>"]
+edition = "2018"
+license = "MIT"
+description = "Generate a zsh prompt that prints the current branch name with colors."
+
+[dependencies]
