@@ -4,7 +4,7 @@ use std::env;
 use std::fs;
 use std::io;
 use std::path;
-use std::process;
+use std::process::Command;
 
 fn main() -> io::Result<()> {
     let wd = env::current_dir()?;
@@ -13,7 +13,11 @@ fn main() -> io::Result<()> {
         None => return Ok(()), // current dir is not a git repo
     };
 
-    println!(" %F{{blue}}(%F{{red}}{}%F{{blue}})%f{}", branch, if is_dirty() { "💩" } else { "" });
+    println!(
+        " %F{{blue}}(%F{{red}}{}%F{{blue}})%f{}",
+        branch,
+        if is_dirty() { "💩" } else { "" }
+    );
 
     Ok(())
 }
@@ -21,16 +25,12 @@ fn main() -> io::Result<()> {
 /// Return true if the working tree is dirty. "Dirty" means that there are
 /// modifications that haven't been committed yet.
 fn is_dirty() -> bool {
-    let output = match process::Command::new("git")
+    Command::new("git")
         .arg("status")
         .arg("--short")
         .output()
-    {
-        Ok(out) => out,
-        Err(_) => return false,
-    };
-
-    !output.stdout.is_empty()
+        .map(|out| !out.stdout.is_empty())
+        .unwrap_or(false)
 }
 
 /// Return the name of the current branch. If we're in a directory that isn't
@@ -38,17 +38,14 @@ fn is_dirty() -> bool {
 fn current_branch(wd: &path::Path) -> Option<String> {
     if inside_dotgit_dir(wd) {
         // Print ".git" instead of the branch name.
-        return Some(".git".to_string());
+        return Some(".git".to_owned());
     }
 
     // Find the path to the .git/HEAD file.
-    let head_path = match find_head(wd) {
-        Some(p) => p,
-        None => return None,
-    };
+    let path_to_head = find_head(wd)?;
 
     // Read .git/HEAD and extract the branch name.
-    read_head(head_path.as_path()).ok()
+    read_head(&path_to_head).ok()
 }
 
 /// Return true if we're inside the hidden .git/ directory in a repo.
@@ -84,6 +81,6 @@ fn find_head(dir: &path::Path) -> Option<path::PathBuf> {
 /// Read the .git/HEAD file and extract the name of the current branch.
 fn read_head(path_to_head: &path::Path) -> io::Result<String> {
     let mut s = fs::read_to_string(path_to_head)?;
-    s = s.trim().trim_start_matches("ref: refs/heads/").to_string();
+    s = s.trim().trim_start_matches("ref: refs/heads/").to_owned();
     Ok(s)
 }
