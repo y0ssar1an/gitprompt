@@ -6,4 +6,6 @@ edition = "2018"
 license = "MIT"
 description = "Generate a zsh prompt that prints the current branch name with colors."
 
-[dependencies]
+[profile.release]
+codegen-units = 1
+lto = true
